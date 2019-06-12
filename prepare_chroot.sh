@@ -3,14 +3,18 @@
 # exit in case of error
 set -e
 
+# configure these
 maindir=$(pwd)
+chroot_name=gentoo
 files=$maindir/files
 repo=http://distfiles.gentoo.org/releases/amd64/autobuilds
+
+# don't touch these
 stage3=""
 portage="portage-latest.tar.xz"
 latest=""
-root=/tmp/$maindir/gentoo
-dest=$maindir/gentoo
+root=/tmp/$maindir/$chroot_name
+dest=$maindir/$chroot_name
 
 # create chroot directory if missing
 if [ ! -d $root ]; then
@@ -63,10 +67,10 @@ else
 fi
 echo ""
 
-if [ -z $(findmnt | grep -i $root) ]; then
+echo "============= Mounting the filesystem ================"
+if [[ -z "$(findmnt | grep -i $chroot_name)" ]]; then
 	# mount the filesystems (requires SUDO)
-	echo "============= Mounting the filesystem ================"
-	echo "---> Remember to umount when chrooting is over!" 
+	echo "---> Remember to umount when chrooting is over!"
 	echo "---> Requires sudo"
 	sudo mount -v --rbind /dev $root/dev
 	sudo mount -v --make-rslave $root/dev
@@ -76,15 +80,14 @@ if [ -z $(findmnt | grep -i $root) ]; then
 	echo "---> Setting up networking"
 	sudo cp -v /etc/resolv.conf $root/etc/resolv.conf
 	echo ""
+else
+	echo "---> Skipping since filesystem is already mounted"
 fi
 
 # copy execution scripts to chroot environment
 echo "======= Copying setup scripts to the filesystem ======="
 echo "---> Requires sudo"
-sudo cp -v $files/setup.sh $root/
-sudo cp -v $files/make.conf $root/etc/portage/make.conf
-sudo cp -v $files/package.accept_keywords $root/etc/portage/
-sudo cp -v $files/use_greatspn $root/etc/portage/package.use/
+sudo cp -rv $files/* $root/
 echo ""
 
 # chroot
@@ -102,11 +105,14 @@ sudo umount -R $root/dev
 
 # copy everything to dest directory once done
 echo "========= Finishing up and copying chroot ============"
-echo "---> Copying to $dest"
-if [ -d $dest]; then
+
+if [ -d $dest ]; then
 	echo "ERROR: $dest already exists"
 	exit 1
 else
-	cp -rv $root $dest
+	destball=greatspn-$chroot_name-$(date +%s).tar.gz
+	echo "---> Creating tarball in $maindir/$destball"
+	echo "---> Requires sudo"
+	sudo tar cf $destball $root
 fi
 echo "Done!"
