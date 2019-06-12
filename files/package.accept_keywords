@@ -1,0 +1,10 @@
+# required by dev-java/openjdk-bin-11.0.3_p7-r1::gentoo
+# required by sci-mathematics/greatspn-9999::greatspn-overlay
+# required by greatspn (argument)
+sys-apps/baselayout-java ~amd64
+# required by sci-mathematics/greatspn-9999::greatspn-overlay
+# required by greatspn (argument)
+dev-java/openjdk-bin ~amd64
+
+=sys-libs/meddly-9999 **
+=sci-mathematics/greatspn-9999 **

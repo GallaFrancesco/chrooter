@@ -1,0 +1,8 @@
+# required by x11-misc/xdg-utils-1.1.3-r1::gentoo
+# required by sci-mathematics/greatspn-9999::greatspn-overlay
+# required by greatspn (argument)
+>=app-text/xmlto-0.0.28-r1 text
+# required by media-gfx/graphviz-2.40.1-r1::gentoo
+# required by sci-mathematics/greatspn-9999::greatspn-overlay
+# required by greatspn (argument)
+>=media-libs/gd-2.2.5-r2 fontconfig png jpeg truetype
