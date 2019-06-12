@@ -113,6 +113,6 @@ else
 	destball=greatspn-$chroot_name-$(date +%s).tar.gz
 	echo "---> Creating tarball in $maindir/$destball"
 	echo "---> Requires sudo"
-	sudo tar cf $destball $root
+	sudo tar -cpzf $destball $root
 fi
 echo "Done!"
