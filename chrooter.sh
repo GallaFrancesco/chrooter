@@ -8,13 +8,21 @@ maindir=$(pwd)
 chroot_name=gentoo
 files=$maindir/files
 repo=http://distfiles.gentoo.org/releases/amd64/autobuilds
+ddir=$maindir/distrib
+nuser="mcc2019"
 
 # don't touch these
 stage3=""
 portage="portage-latest.tar.xz"
 latest=""
 root=/tmp/$maindir/$chroot_name
-dest=$maindir/$chroot_name
+dest=$ddir/$chroot_name
+nuser=""
+
+if [[ "$(whoami)" != "root" ]]; then
+	echo "You don't have permission to run chrooter."
+	exit 1
+fi
 
 # create chroot directory if missing
 if [ ! -d $root ]; then
@@ -22,6 +30,14 @@ if [ ! -d $root ]; then
 	mkdir -pv $root
 else
 	echo "============= Found CHROOT directory ================="
+fi
+echo ""
+
+if [ ! -d $ddir ]; then
+	echo "========== Creating Distribution directory ==========="
+	mkdir -pv $ddir
+else
+	echo "=========== Found Distribution directory ============="
 fi
 echo ""
 
@@ -56,11 +72,9 @@ echo "============ Unpacking Stage 3 tarball ==============="
 if [ ! "$(ls -A $root)" ]; then # root is empty
 	# unpack the tarball
 	echo "* Unpacking filesystem into $root"
-	echo "* Requires sudo"
-	sudo tar xpf $tarball -C $root
+	tar xpf $tarball -C $root
 	echo "* Unpacking portage tree into $root/usr"
-	echo "* Requires sudo"
-	sudo tar xpf $portage -C $root/usr
+	tar xpf $portage -C $root/usr
 	echo "Done!"
 else
 	echo "* Skipping since $root is not empty."
@@ -71,14 +85,13 @@ echo "============= Mounting the filesystem ================"
 if [[ -z "$(findmnt | grep -i $chroot_name)" ]]; then
 	# mount the filesystems (requires SUDO)
 	echo "* Remember to umount when chrooting is over!"
-	echo "* Requires sudo"
-	sudo mount -v --rbind /dev $root/dev
-	sudo mount -v --make-rslave $root/dev
-	sudo mount -v -t proc /proc $root/proc
-	sudo mount -v --rbind /sys $root/sys
-	sudo mount -v --make-rslave $root/sys
+	mount -v --rbind /dev $root/dev
+	mount -v --make-rslave $root/dev
+	mount -v -t proc /proc $root/proc
+	mount -v --rbind /sys $root/sys
+	mount -v --make-rslave $root/sys
 	echo "* Setting up networking"
-	sudo cp -v /etc/resolv.conf $root/etc/resolv.conf
+	cp -v /etc/resolv.conf $root/etc/resolv.conf
 	echo ""
 else
 	echo "* Skipping since filesystem is already mounted"
@@ -86,49 +99,43 @@ fi
 
 # copy execution scripts to chroot environment
 echo "======= Copying setup scripts to the filesystem ======="
-echo "* Requires sudo"
-sudo cp -rv $files/* $root/
+cp -rv $files/* $root/
 echo ""
 
 # chroot
 echo "========== Entering Chroot and setting up ============"
-echo "* Requires sudo"
 echo ""
-sudo chroot $root ./setup.sh
+chroot $root ./setup.sh
 
 # exited chroot: umount partitions
 echo "========== Unmounting Chroot partitions =============="
-echo "* Requires sudo"
-sudo umount -f $root/proc
-sudo umount -R $root/sys
-sudo umount -R $root/dev
+umount -f $root/proc
+umount -R $root/sys
+umount -R $root/dev
 
 # copy everything to dest directory once done
 echo "========= Finishing up and copying chroot ============"
 
-if [ -d $dest ]; then
-	echo "ERROR: $dest already exists"
-	exit 1
-else
-	destball=greatspn-$chroot_name-$(date +%s).tar.gz
-	distball=greatspn-$(date +%s).tar.gz
-	echo "* Creating tarball in $maindir/$destball"
-	echo "* Requires sudo"
-	sudo tar -cpzf $destball $root
-	echo "* Creating binary distribution in $maindir/$distball"
-	echo "* Requires sudo"
-	sudo tar -cpzf $distball \
-		$root/usr/local/GreatSPN \
-		$root/usr/local/lib \
-		$root/usr/local/share/applications/pnpro-editor.desktop \
-		$root/usr/local/share/mime/application/x-pnpro-editor.xml \
-		/usr/local/share/mime/packages/application-x-pnpro-editor.xml
-	echo "* Fixing permissions"
-	echo "* Requires sudo"
-	sudo chown $USER $destball
-	sudo chown $USER $distball
-	echo "* Computing sha1sum of binary release and saving to $distball-sha1.txt"
-	sha1sum $distball > $distball-sha1.txt
+destball=greatspn-$chroot_name-$(date +%s).tar.gz
+distball=greatspn-$(date +%s).tar.gz
+cd $ddir
+echo "* Creating tarball in $ddir/$destball"
+tar -cpzf $destball $root
+echo ""
+echo "* Creating binary distribution in $ddir/$distball"
+tar -cpzf $distball -C $root \
+	usr/local/GreatSPN \
+	usr/local/lib64 \
+	usr/local/lib \
+	usr/local/share/applications/pnpro-editor.desktop \
+	usr/local/share/mime/application/x-pnpro-editor.xml \
+	usr/local/share/mime/packages/application-x-pnpro-editor.xml
+echo ""
+echo "* Fixing permissions"
+chown $nuser $destball
+chown $nuser $distball
 
-fi
-echo "Done!"
+su $nuser
+echo ""
+echo "* Computing sha1sum of binary release and saving to $distball-sha1.txt"
+sha1sum $distball > $distball-sha1.txt
