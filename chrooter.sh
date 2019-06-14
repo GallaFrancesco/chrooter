@@ -111,18 +111,24 @@ if [ -d $dest ]; then
 	exit 1
 else
 	destball=greatspn-$chroot_name-$(date +%s).tar.gz
-	distball=greatsp-$(date +%s).tar.gz
+	distball=greatspn-$(date +%s).tar.gz
 	echo "* Creating tarball in $maindir/$destball"
 	echo "* Requires sudo"
 	sudo tar -cpzf $destball $root
 	echo "* Creating binary distribution in $maindir/$distball"
 	echo "* Requires sudo"
 	sudo tar -cpzf $distball \
-		-C $root/usr/local/GreatSPN \
-		-C $root/usr/local/lib \
-		-C $root/usr/local/share/applications/pnpro-editor.desktop \
-		-C $root/usr/local/share/mime/application/x-pnpro-editor.xml \
-		-C /usr/local/share/mime/packages/application-x-pnpro-editor.xml
+		$root/usr/local/GreatSPN \
+		$root/usr/local/lib \
+		$root/usr/local/share/applications/pnpro-editor.desktop \
+		$root/usr/local/share/mime/application/x-pnpro-editor.xml \
+		/usr/local/share/mime/packages/application-x-pnpro-editor.xml
+	echo "* Fixing permissions"
+	echo "* Requires sudo"
+	sudo chown $USER $destball
+	sudo chown $USER $distball
+	echo "* Computing sha1sum of binary release and saving to $distball-sha1.txt"
+	sha1sum $distball > $distball-sha1.txt
 
 fi
 echo "Done!"
