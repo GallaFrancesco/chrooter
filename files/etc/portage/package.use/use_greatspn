@@ -6,3 +6,29 @@
 # required by sci-mathematics/greatspn-9999::greatspn-overlay
 # required by greatspn (argument)
 >=media-libs/gd-2.2.5-r2 fontconfig png jpeg truetype
+sci-mathematics/greatspn static-libs
+# required by sci-mathematics/greatspn-9999::greatspn-overlay
+# required by @selected
+# required by @world (argument)
+>=dev-libs/gmp-6.1.2 static-libs
+# required by sci-mathematics/greatspn-9999::greatspn-overlay
+# required by @selected
+# required by @world (argument)
+>=dev-libs/boost-1.65.0 static-libs
+# required by sci-mathematics/greatspn-9999::greatspn-overlay
+# required by @selected
+# required by @world (argument)
+>=media-gfx/graphviz-2.40.1-r1 static-libs
+# required by sci-mathematics/greatspn-9999::greatspn-overlay
+# required by @selected
+# required by @world (argument)
+>=dev-libs/glib-2.58.3 static-libs
+# required by sci-mathematics/greatspn-9999::greatspn-overlay
+# required by @selected
+# required by @world (argument)
+>=sci-mathematics/glpk-4.63 static-libs
+# required by sci-mathematics/greatspn-9999::greatspn-overlay
+# required by @selected
+# required by @world (argument)
+>=sci-mathematics/lpsolve-5.5.2.0 static-libs
+sci-libs/colamd static-libs
