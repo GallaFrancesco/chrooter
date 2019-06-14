@@ -17,7 +17,6 @@ portage="portage-latest.tar.xz"
 latest=""
 root=/tmp/$maindir/$chroot_name
 dest=$ddir/$chroot_name
-nuser=""
 
 if [[ "$(whoami)" != "root" ]]; then
 	echo "You don't have permission to run chrooter."
@@ -135,7 +134,7 @@ echo "* Fixing permissions"
 chown $nuser $destball
 chown $nuser $distball
 
-su $nuser
 echo ""
 echo "* Computing sha1sum of binary release and saving to $distball-sha1.txt"
 sha1sum $distball > $distball-sha1.txt
+chown $nuser $distball-sha1.txt
